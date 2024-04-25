@@ -1,4 +1,5 @@
-import type { MetaFunction } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import { Form, redirect } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [
@@ -7,6 +8,14 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+export async function action({ request }: ActionFunctionArgs) {
+  let formData = await request.formData();
+  let data = Object.fromEntries(formData);
+  console.log(data);
+
+  return redirect("/");
+}
+
 export default function Index() {
   return (
     <div className="p-10">
@@ -14,6 +23,58 @@ export default function Index() {
       <p className="mt-2 text-lg text-gray-400">
         Learnings and doings. Updated weekly.
       </p>
+
+      <div className="my-8 border p-3">
+        <p className="italic">Create a new entry</p>
+
+        <Form method="post" className="mt-2">
+          <div>
+            <div>
+              <input type="date" name="date" className="text-gray-500" />
+            </div>
+            <div className="mt-4 space-x-4">
+              <label className="inline-block">
+                <input type="radio" name="type" value="work" className="mr-1" />
+                Work
+              </label>
+              <label className="inline-block">
+                <input
+                  type="radio"
+                  name="type"
+                  value="learning"
+                  className="mr-1"
+                />
+                Learning
+              </label>
+              <label className="inline-block">
+                <input
+                  type="radio"
+                  name="type"
+                  value="interesting-thing"
+                  className="mr-1"
+                />
+                Interesting thing
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-4">
+            <textarea
+              placeholder="Type your entry..."
+              name="text"
+              className="w-full text-gray-700"
+            />
+          </div>
+          <div className="mt-2 text-right">
+            <button
+              type="submit"
+              className="bg-blue-500 px-4 py-1 font-semibold text-white"
+            >
+              Save
+            </button>
+          </div>
+        </Form>
+      </div>
 
       <div className="mt-6">
         <p className="font-bold">
