@@ -18,7 +18,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <div className="p-10">
+          <h1 className="text-5xl">Work Journal</h1>
+          <p className="mt-2 text-lg text-gray-400">
+            Learnings and doings. Updated weekly.
+          </p>
+          {children}
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>

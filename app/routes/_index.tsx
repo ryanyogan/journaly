@@ -1,5 +1,5 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { json, useFetcher, useLoaderData } from "@remix-run/react";
+import { Link, json, useFetcher, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
 import { prisma } from "~/db/prisma";
@@ -86,12 +86,7 @@ export default function Index() {
   }, [fetcher.state]);
 
   return (
-    <div className="p-10">
-      <h1 className="text-5xl">Work Journal</h1>
-      <p className="mt-2 text-lg text-gray-400">
-        Learnings and doings. Updated weekly.
-      </p>
-
+    <div>
       <div className="my-8 border p-3">
         <p className="italic">Create a new entry</p>
 
@@ -176,7 +171,7 @@ export default function Index() {
                   <p>Work</p>
                   <ul className="ml-8 list-disc">
                     {week.work.map((entry) => (
-                      <li key={entry.id}>{entry.text}</li>
+                      <EntryListItem key={entry.id} entry={entry} />
                     ))}
                   </ul>
                 </div>
@@ -186,7 +181,7 @@ export default function Index() {
                   <p>Learning</p>
                   <ul className="ml-8 list-disc">
                     {week.learnings.map((entry) => (
-                      <li key={entry.id}>{entry.text}</li>
+                      <EntryListItem key={entry.id} entry={entry} />
                     ))}
                   </ul>
                 </div>
@@ -196,7 +191,7 @@ export default function Index() {
                   <p>Intersting things</p>
                   <ul className="ml-8 list-disc">
                     {week.interestingThings.map((entry) => (
-                      <li key={entry.id}>{entry.text}</li>
+                      <EntryListItem key={entry.id} entry={entry} />
                     ))}
                   </ul>
                 </div>
@@ -206,5 +201,20 @@ export default function Index() {
         ))}
       </div>
     </div>
+  );
+}
+
+function EntryListItem({ entry }: { entry: any }) {
+  return (
+    <li className="group">
+      {entry.text}
+
+      <Link
+        to={`/entries/${entry.id}/edit`}
+        className="ml-2 text-blue-500 opacity-0 group-hover:opacity-100"
+      >
+        Edit
+      </Link>
+    </li>
   );
 }
