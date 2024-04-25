@@ -1,6 +1,6 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { useFetcher } from "@remix-run/react";
-import { format } from "date-fns";
+import { json, useFetcher, useLoaderData } from "@remix-run/react";
+import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
 import { prisma } from "~/db/prisma";
 
@@ -34,9 +34,49 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
+export async function loader() {
+  let entries = await prisma.entry.findMany({
+    orderBy: { date: "desc" },
+  });
+
+  return json({
+    entries: entries.map((entry) => ({
+      ...entry,
+      date: entry.date.toISOString().substring(0, 10),
+    })),
+  });
+}
+
 export default function Index() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
+  let { entries } = useLoaderData<typeof loader>();
+
+  let entriesByWeek = entries.reduce<Record<string, typeof entries>>(
+    (sortedEntries, entry) => {
+      let sunday = startOfWeek(parseISO(entry.date));
+      let sundayString = format(sunday, "yyyy-MM-dd");
+
+      sortedEntries[sundayString] ||= [];
+      sortedEntries[sundayString].push(entry);
+
+      return sortedEntries;
+    },
+    {}
+  );
+
+  let weeks = Object.keys(entriesByWeek)
+    .sort((a, b) => a.localeCompare(b))
+    .map((dateString) => ({
+      dateString,
+      work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
+      learnings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "learning"
+      ),
+      interestingThings: entriesByWeek[dateString].filter(
+        (entry) => entry.type === "interesting-thing"
+      ),
+    }));
 
   useEffect(() => {
     if (fetcher.state === "idle" && textareaRef.current) {
@@ -124,34 +164,46 @@ export default function Index() {
         </fetcher.Form>
       </div>
 
-      <div className="mt-6">
-        <p className="font-bold">
-          Week of April 20<sup>th</sup>
-        </p>
-
-        <div className="mt-3 space-y-4">
-          <div>
-            <p>Work</p>
-            <ul className="ml-8 list-disc">
-              <li>First Item</li>
-              <li>Second Item</li>
-            </ul>
+      <div className="mt-12 space-y-12">
+        {weeks.map((week) => (
+          <div key={week.dateString}>
+            <p className="font-bold">
+              Week of {format(parseISO(week.dateString), "MMMM do")}
+            </p>
+            <div className="mt-3 space-y-4">
+              {week.work.length > 0 && (
+                <div>
+                  <p>Work</p>
+                  <ul className="ml-8 list-disc">
+                    {week.work.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {week.learnings.length > 0 && (
+                <div>
+                  <p>Learning</p>
+                  <ul className="ml-8 list-disc">
+                    {week.learnings.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {week.interestingThings.length > 0 && (
+                <div>
+                  <p>Intersting things</p>
+                  <ul className="ml-8 list-disc">
+                    {week.interestingThings.map((entry) => (
+                      <li key={entry.id}>{entry.text}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
-          <div>
-            <p>Learnings</p>
-            <ul className="ml-8 list-disc">
-              <li>First Item</li>
-              <li>Second Item</li>
-            </ul>
-          </div>
-          <div>
-            <p>Interesting things</p>
-            <ul className="ml-8 list-disc">
-              <li>First Item</li>
-              <li>Second Item</li>
-            </ul>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   );
