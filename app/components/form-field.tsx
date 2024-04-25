@@ -1,10 +1,11 @@
 import { useFetcher } from "@remix-run/react";
-import { useRef } from "react";
+import { format } from "date-fns";
+import { useEffect, useRef } from "react";
 
 export function FormField({
   entry,
 }: {
-  entry: {
+  entry?: {
     text: string;
     date: string;
     type: string;
@@ -12,6 +13,17 @@ export function FormField({
 }) {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (
+      fetcher.state === "idle" &&
+      fetcher.data === null &&
+      textareaRef.current
+    ) {
+      textareaRef.current.value = "";
+      textareaRef.current.focus();
+    }
+  }, [fetcher.state, fetcher.data]);
 
   return (
     <fetcher.Form method="post" className="mt-2">
@@ -26,41 +38,27 @@ export function FormField({
               name="date"
               className="text-gray-900"
               required
-              defaultValue={entry.date}
+              defaultValue={format(new Date(), "yyyy-MM-dd")}
             />
           </div>
           <div className="mt-4 space-x-4">
-            <label className="inline-block">
-              <input
-                required
-                defaultChecked={entry.type === "work"}
-                type="radio"
-                name="type"
-                value="work"
-                className="mr-1"
-              />
-              Work
-            </label>
-            <label className="inline-block">
-              <input
-                defaultChecked={entry.type === "learning"}
-                type="radio"
-                name="type"
-                value="learning"
-                className="mr-1"
-              />
-              Learning
-            </label>
-            <label className="inline-block">
-              <input
-                defaultChecked={entry.type === "interesting-thing"}
-                type="radio"
-                name="type"
-                value="interesting-thing"
-                className="mr-1"
-              />
-              Interesting thing
-            </label>
+            {[
+              { label: "Work", value: "work" },
+              { label: "Learning", value: "learning" },
+              { label: "Interesting thing", value: "interesting-thing" },
+            ].map((option) => (
+              <label key={option.value} className="inline-block">
+                <input
+                  required
+                  type="radio"
+                  name="type"
+                  value="work"
+                  defaultChecked={option.value === (entry?.type ?? "work")}
+                  className="mr-1"
+                />
+                {option.label}
+              </label>
+            ))}
           </div>
         </div>
 
@@ -71,7 +69,7 @@ export function FormField({
             name="text"
             className="w-full text-gray-700"
             required
-            defaultValue={entry.text}
+            defaultValue={entry?.text}
           />
         </div>
         <div className="mt-2 text-right">

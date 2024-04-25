@@ -2,6 +2,7 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { Link, json, useFetcher, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
+import { FormField } from "~/components/form-field";
 import { prisma } from "~/db/prisma";
 
 export const meta: MetaFunction = () => {
@@ -89,74 +90,7 @@ export default function Index() {
     <div>
       <div className="my-8 border p-3">
         <p className="italic">Create a new entry</p>
-
-        <fetcher.Form method="post" className="mt-2">
-          <fieldset
-            className="disabled:opacity-70"
-            disabled={fetcher.state === "submitting"}
-          >
-            <div>
-              <div>
-                <input
-                  type="date"
-                  name="date"
-                  className="text-gray-900"
-                  required
-                  defaultValue={format(new Date(), "yyyy-MM-dd")}
-                />
-              </div>
-              <div className="mt-4 space-x-4">
-                <label className="inline-block">
-                  <input
-                    defaultChecked
-                    type="radio"
-                    name="type"
-                    value="work"
-                    className="mr-1"
-                  />
-                  Work
-                </label>
-                <label className="inline-block">
-                  <input
-                    required
-                    type="radio"
-                    name="type"
-                    value="learning"
-                    className="mr-1"
-                  />
-                  Learning
-                </label>
-                <label className="inline-block">
-                  <input
-                    type="radio"
-                    name="type"
-                    value="interesting-thing"
-                    className="mr-1"
-                  />
-                  Interesting thing
-                </label>
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <textarea
-                ref={textareaRef}
-                placeholder="Type your entry..."
-                name="text"
-                className="w-full text-gray-700"
-                required
-              />
-            </div>
-            <div className="mt-2 text-right">
-              <button
-                type="submit"
-                className="bg-blue-500 px-4 py-1 font-semibold text-white"
-              >
-                {fetcher.state === "submitting" ? "Saving..." : "Save"}
-              </button>
-            </div>
-          </fieldset>
-        </fetcher.Form>
+        <FormField />
       </div>
 
       <div className="mt-12 space-y-12">
