@@ -1,5 +1,8 @@
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Form, redirect } from "@remix-run/react";
+import { useFetcher } from "@remix-run/react";
+import { format } from "date-fns";
+import { useEffect, useRef } from "react";
+import { prisma } from "~/db/prisma";
 
 export const meta: MetaFunction = () => {
   return [
@@ -10,13 +13,38 @@ export const meta: MetaFunction = () => {
 
 export async function action({ request }: ActionFunctionArgs) {
   let formData = await request.formData();
-  let data = Object.fromEntries(formData);
-  console.log(data);
+  let { date, type, text } = Object.fromEntries(formData);
+  if (
+    typeof date !== "string" ||
+    typeof type !== "string" ||
+    typeof text !== "string" ||
+    text.length === 0
+  ) {
+    throw new Error("Bad Request");
+  }
 
-  return redirect("/");
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+
+  return prisma.entry.create({
+    data: {
+      date: new Date(date),
+      type,
+      text,
+    },
+  });
 }
 
 export default function Index() {
+  let fetcher = useFetcher();
+  let textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (fetcher.state === "idle" && textareaRef.current) {
+      textareaRef.current.value = "";
+      textareaRef.current.focus();
+    }
+  }, [fetcher.state]);
+
   return (
     <div className="p-10">
       <h1 className="text-5xl">Work Journal</h1>
@@ -27,53 +55,73 @@ export default function Index() {
       <div className="my-8 border p-3">
         <p className="italic">Create a new entry</p>
 
-        <Form method="post" className="mt-2">
-          <div>
+        <fetcher.Form method="post" className="mt-2">
+          <fieldset
+            className="disabled:opacity-70"
+            disabled={fetcher.state === "submitting"}
+          >
             <div>
-              <input type="date" name="date" className="text-gray-500" />
-            </div>
-            <div className="mt-4 space-x-4">
-              <label className="inline-block">
-                <input type="radio" name="type" value="work" className="mr-1" />
-                Work
-              </label>
-              <label className="inline-block">
+              <div>
                 <input
-                  type="radio"
-                  name="type"
-                  value="learning"
-                  className="mr-1"
+                  type="date"
+                  name="date"
+                  className="text-gray-900"
+                  required
+                  defaultValue={format(new Date(), "yyyy-MM-dd")}
                 />
-                Learning
-              </label>
-              <label className="inline-block">
-                <input
-                  type="radio"
-                  name="type"
-                  value="interesting-thing"
-                  className="mr-1"
-                />
-                Interesting thing
-              </label>
+              </div>
+              <div className="mt-4 space-x-4">
+                <label className="inline-block">
+                  <input
+                    defaultChecked
+                    type="radio"
+                    name="type"
+                    value="work"
+                    className="mr-1"
+                  />
+                  Work
+                </label>
+                <label className="inline-block">
+                  <input
+                    required
+                    type="radio"
+                    name="type"
+                    value="learning"
+                    className="mr-1"
+                  />
+                  Learning
+                </label>
+                <label className="inline-block">
+                  <input
+                    type="radio"
+                    name="type"
+                    value="interesting-thing"
+                    className="mr-1"
+                  />
+                  Interesting thing
+                </label>
+              </div>
             </div>
-          </div>
 
-          <div className="mt-4">
-            <textarea
-              placeholder="Type your entry..."
-              name="text"
-              className="w-full text-gray-700"
-            />
-          </div>
-          <div className="mt-2 text-right">
-            <button
-              type="submit"
-              className="bg-blue-500 px-4 py-1 font-semibold text-white"
-            >
-              Save
-            </button>
-          </div>
-        </Form>
+            <div className="mt-4">
+              <textarea
+                ref={textareaRef}
+                placeholder="Type your entry..."
+                name="text"
+                className="w-full text-gray-700"
+                required
+              />
+            </div>
+            <div className="mt-2 text-right">
+              <button
+                type="submit"
+                className="bg-blue-500 px-4 py-1 font-semibold text-white"
+              >
+                {fetcher.state === "submitting" ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </fieldset>
+        </fetcher.Form>
       </div>
 
       <div className="mt-6">
