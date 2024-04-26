@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher, useFetchers, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
 import { FormField } from "~/components/form-field";
@@ -8,7 +8,11 @@ import type { loader } from "./route";
 export function IndexPage() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
-  let { entries, session } = useLoaderData<typeof loader>();
+  let { entries: serverEntries, session } = useLoaderData<typeof loader>();
+
+  let pendingEntries = usePendingEntries();
+  type Entry = (typeof serverEntries)[number] | (typeof pendingEntries)[number];
+  let entries = [...serverEntries, ...pendingEntries] as Entry[];
 
   let entriesByWeek = entries.reduce<Record<string, typeof entries>>(
     (sortedEntries, entry) => {
@@ -78,4 +82,21 @@ export function IndexPage() {
       </div>
     </div>
   );
+}
+
+function usePendingEntries() {
+  type CreateEntryFetcher = ReturnType<typeof useFetchers>[number] & {
+    formData: FormData;
+  };
+
+  return useFetchers()
+    .filter((fetcher): fetcher is CreateEntryFetcher => {
+      return fetcher.formData?.get("intent") === "createEntry";
+    })
+    .map((fetcher) => {
+      let text = String(fetcher.formData.get("text"));
+      let type = String(fetcher.formData.get("type"));
+      let date = String(fetcher.formData.get("date"));
+      return { text, type, date };
+    });
 }

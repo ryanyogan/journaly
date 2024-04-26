@@ -8,7 +8,7 @@ export function EntryListItem({ entry }: { entry: any }) {
   return (
     <li className="group leading-7">
       <div className="text-xs text-gray-500">
-        {format(entry.createdAt, "MMMM dd, yyyy 'at' h:mm a")}
+        {format(entry.date, "MMMM dd, yyyy")}
       </div>
       {entry.text}
 

@@ -27,6 +27,7 @@ export function FormField({
 
   return (
     <fetcher.Form method="post" className="mt-4">
+      <input type="hidden" name="intent" value="createEntry" />
       <fieldset
         className="disabled:opacity-70"
         disabled={fetcher.state === "submitting"}
