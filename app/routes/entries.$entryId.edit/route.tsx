@@ -1,7 +1,9 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/react";
+import { eq } from "drizzle-orm";
 import { getSession } from "~/auth/session";
-import { prisma } from "~/db/prisma";
+import { db } from "~/db/drizzle.server";
+import { entries } from "~/db/schema";
 import { EditPage } from "./edit-page";
 
 export async function loader({ params, request }: LoaderFunctionArgs) {
@@ -9,8 +11,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  let entry = await prisma.entry.findUnique({
-    where: { id: Number(params.entryId) },
+  let entry = await db.query.entries.findFirst({
+    where: eq(entries.id, Number(params.entryId)),
   });
 
   if (!entry) {
@@ -24,7 +26,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   return json({
     ...entry,
-    date: entry.date.toISOString().substring(0, 10),
+    date: entry.date.substring(0, 10),
   });
 }
 
@@ -41,13 +43,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
   let formData = await request.formData();
   let { date, type, text, intent } = Object.fromEntries(formData);
 
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
   switch (intent) {
     case "delete": {
-      await prisma.entry.delete({
-        where: { id: Number(params.entryId) },
-      });
+      await db.delete(entries).where(eq(entries.id, Number(params.entryId)));
 
       return redirect("/");
     }
@@ -61,14 +59,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
         throw new Error("Bad Request");
       }
 
-      await prisma.entry.update({
-        where: { id: Number(params.entryId) },
-        data: {
-          date: new Date(date),
+      await db
+        .update(entries)
+        .set({
+          date: new Date(date).toISOString(),
           type,
           text,
-        },
-      });
+        })
+        .where(eq(entries.id, Number(params.entryId)));
 
       return redirect("/");
     }

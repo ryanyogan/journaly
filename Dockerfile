@@ -28,9 +28,9 @@ RUN apt-get update -qq && \
 COPY --link package-lock.json package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
-# Generate Prisma Client
-COPY --link prisma .
-RUN npx prisma generate
+# # Generate Prisma Client
+# COPY --link prisma .
+# RUN npx prisma generate
 
 # Copy application code
 COPY --link . .
@@ -40,7 +40,6 @@ RUN pnpm run build
 
 # Remove development dependencies
 RUN pnpm prune --prod
-
 
 # Final stage for app image
 FROM base
@@ -61,11 +60,11 @@ VOLUME /data
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
 # Entrypoint prepares the database.
-ENTRYPOINT [ "/app/docker-entrypoint.js" ]
+# ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 ENV PORT="8080"
 EXPOSE 8080
 
-ENV DATABASE_URL="file:///data/sqlite.db"
+ENV DATABASE_URL="/data/sqlite.db"
 CMD [ "pnpm", "run", "start" ]

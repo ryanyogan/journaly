@@ -4,8 +4,10 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { json } from "@remix-run/react";
+import { desc } from "drizzle-orm";
 import { getSession } from "~/auth/session";
-import { prisma } from "~/db/prisma";
+import { db } from "~/db/drizzle.server";
+import { entries } from "~/db/schema";
 import { IndexPage } from "./page";
 
 export const meta: MetaFunction = () => {
@@ -32,27 +34,23 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Error("Bad Request");
   }
 
-  return prisma.entry.create({
-    data: {
-      date: new Date(date),
-      type,
-      text,
-    },
+  return db.insert(entries).values({
+    date: new Date(date).toISOString(),
+    type,
+    text,
   });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   let session = await getSession(request.headers.get("Cookie"));
 
-  let entries = await prisma.entry.findMany({
-    orderBy: { date: "desc" },
-  });
+  let posts = await db.select().from(entries).orderBy(desc(entries.date));
 
   return json({
     session: session.data,
-    entries: entries.map((entry) => ({
+    entries: posts.map((entry) => ({
       ...entry,
-      date: entry.date.toISOString().substring(0, 10),
+      date: entry.date.substring(0, 10),
     })),
   });
 }
