@@ -62,16 +62,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <span className="font-semibold text-gray-200">Yogan</span>
                 </p>
               </a>
-
-              <div className="text-gray-500 text-sm font-medium hover:text-gray-200">
-                {session?.isAdmin ? (
-                  <Form method="post">
-                    <button>Logout</button>
-                  </Form>
-                ) : (
-                  <Link to="/login">Login</Link>
-                )}
-              </div>
             </div>
             <div className="my-20 lg:my-28">
               <div className="text-center">
@@ -100,6 +90,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 www.ryanyogan.com
               </a>
             </p>
+            <div className="text-gray-500 text-xs font-medium hover:text-gray-200">
+              {session?.isAdmin ? (
+                <Form method="post">
+                  <button>Logout</button>
+                </Form>
+              ) : (
+                <Link to="/login">login</Link>
+              )}
+            </div>
           </footer>
         </div>
 
