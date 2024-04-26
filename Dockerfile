@@ -64,8 +64,8 @@ RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-c
 ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
-ENV PORT=3000
-EXPOSE 3000
+ENV PORT="8080"
+EXPOSE 8080
 
 ENV DATABASE_URL="file:///data/sqlite.db"
 CMD [ "pnpm", "run", "start" ]

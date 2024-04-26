@@ -1,67 +1,11 @@
-import type {
-  ActionFunctionArgs,
-  LoaderFunctionArgs,
-  MetaFunction,
-} from "@remix-run/node";
-import { Link, json, useFetcher, useLoaderData } from "@remix-run/react";
+import { useFetcher, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
-import { getSession } from "~/auth/session";
 import { FormField } from "~/components/form-field";
-import { prisma } from "~/db/prisma";
+import { EntryList } from "./entry-list";
+import type { loader } from "./route";
 
-export const meta: MetaFunction = () => {
-  return [
-    { title: "Journal" },
-    { name: "description", content: "Write it ... or it didn't happen" },
-  ];
-};
-
-export async function action({ request }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("cookie"));
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", { status: 401 });
-  }
-
-  let formData = await request.formData();
-  let { date, type, text } = Object.fromEntries(formData);
-  if (
-    typeof date !== "string" ||
-    typeof type !== "string" ||
-    typeof text !== "string" ||
-    text.length === 0
-  ) {
-    throw new Error("Bad Request");
-  }
-
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  return prisma.entry.create({
-    data: {
-      date: new Date(date),
-      type,
-      text,
-    },
-  });
-}
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-
-  let entries = await prisma.entry.findMany({
-    orderBy: { date: "asc" },
-  });
-
-  return json({
-    session: session.data,
-    entries: entries.map((entry) => ({
-      ...entry,
-      date: entry.date.toISOString().substring(0, 10),
-    })),
-  });
-}
-
-export default function Index() {
+export function IndexPage() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
   let { entries, session } = useLoaderData<typeof loader>();
@@ -80,7 +24,7 @@ export default function Index() {
   );
 
   let weeks = Object.keys(entriesByWeek)
-    .sort((a, b) => a.localeCompare(b))
+    .sort((a, b) => b.localeCompare(a))
     .map((dateString) => ({
       dateString,
       work: entriesByWeek[dateString].filter((entry) => entry.type === "work"),
@@ -133,38 +77,5 @@ export default function Index() {
         ))}
       </div>
     </div>
-  );
-}
-
-function EntryList({ entries, label }: { entries: any[]; label: string }) {
-  return entries.length > 0 ? (
-    <div>
-      <p className="font-semibold text-white">{label}</p>
-
-      <ul className="mt-4 space-y-6">
-        {entries.map((entry) => (
-          <EntryListItem key={entry.id} entry={entry} />
-        ))}
-      </ul>
-    </div>
-  ) : null;
-}
-
-function EntryListItem({ entry }: { entry: any }) {
-  let { session } = useLoaderData<typeof loader>();
-
-  return (
-    <li className="group leading-7">
-      {entry.text}
-
-      {session.isAdmin && (
-        <Link
-          to={`/entries/${entry.id}/edit`}
-          className="ml-2 text-blue-500 opacity-0 group-hover:opacity-100"
-        >
-          Edit
-        </Link>
-      )}
-    </li>
   );
 }
