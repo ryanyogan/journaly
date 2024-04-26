@@ -1,7 +1,12 @@
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { Link, json, useFetcher, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
 import { useEffect, useRef } from "react";
+import { getSession } from "~/auth/session";
 import { FormField } from "~/components/form-field";
 import { prisma } from "~/db/prisma";
 
@@ -35,12 +40,15 @@ export async function action({ request }: ActionFunctionArgs) {
   });
 }
 
-export async function loader() {
+export async function loader({ request }: LoaderFunctionArgs) {
+  let session = await getSession(request.headers.get("Cookie"));
+
   let entries = await prisma.entry.findMany({
     orderBy: { date: "desc" },
   });
 
   return json({
+    session: session.data,
     entries: entries.map((entry) => ({
       ...entry,
       date: entry.date.toISOString().substring(0, 10),
@@ -51,7 +59,7 @@ export async function loader() {
 export default function Index() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
-  let { entries } = useLoaderData<typeof loader>();
+  let { entries, session } = useLoaderData<typeof loader>();
 
   let entriesByWeek = entries.reduce<Record<string, typeof entries>>(
     (sortedEntries, entry) => {
@@ -88,10 +96,12 @@ export default function Index() {
 
   return (
     <div>
-      <div className="my-8 border p-3">
-        <p className="italic">Create a new entry</p>
-        <FormField />
-      </div>
+      {session.isAdmin && (
+        <div className="my-8 border p-3">
+          <p className="italic">Create a new entry</p>
+          <FormField />
+        </div>
+      )}
 
       <div className="mt-12 space-y-12">
         {weeks.map((week) => (
