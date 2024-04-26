@@ -55,11 +55,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body className="mx-auto max-w-xl p-4 lg:max-w-7xl">
         <div>
           <header>
-            <div className="flex justify-between items-center lg:border-b lg:border-gray-800 lg:pt-1 lg:pb-5">
-              <p className="uppercase">
-                <span className="text-gray-500">Ryan</span>
-                <span className="font-semibold text-gray-200">Yogan</span>
-              </p>
+            <div className="flex justify-between items-center lg:pt-1 lg:pb-5">
+              <a href="https://ryanyogan.com" rel="noreferrer" target="_blank">
+                <p className="uppercase">
+                  <span className="text-gray-500">Ryan</span>
+                  <span className="font-semibold text-gray-200">Yogan</span>
+                </p>
+              </a>
 
               <div className="text-gray-500 text-sm font-medium hover:text-gray-200">
                 {session?.isAdmin ? (
@@ -83,8 +85,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto max-w-3xl">{children}</main>
+          <main className="mx-auto max-w-3xl flex-1">{children}</main>
         </div>
+
+        <footer className="absolute bottom-0 text-center w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
+          <p className="text-gray-500 text-sm">
+            The Journal is my twitter replacement.
+          </p>
+          <p className="text-gray-500 text-sm">
+            <a
+              href="https://ryanyogan.com"
+              target="_blank"
+              rel="noreferrer"
+              className="text-sky-500"
+            >
+              www.ryanyogan.com
+            </a>
+          </p>
+        </footer>
         <ScrollRestoration />
         <Scripts />
       </body>

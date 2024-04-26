@@ -7,7 +7,7 @@ export async function action({ request }: ActionFunctionArgs) {
   let formData = await request.formData();
   let { email, password } = Object.fromEntries(formData);
 
-  if (email === "ryan@jk.com" && password === "asdasd") {
+  if (email === "ryan@jk.com" && password === process.env.RYAN_PASSWORD) {
     let session = await getSession();
     session.set("isAdmin", true);
 
