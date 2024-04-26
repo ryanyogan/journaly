@@ -49,7 +49,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   let session = await getSession(request.headers.get("Cookie"));
 
   let entries = await prisma.entry.findMany({
-    orderBy: { date: "desc" },
+    orderBy: { date: "asc" },
   });
 
   return json({

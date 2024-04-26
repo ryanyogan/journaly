@@ -74,10 +74,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="my-20 lg:my-28">
               <div className="text-center">
                 <h1 className="text-5xl font-semibold tracking-tighter text-white lg:text-7xl">
-                  <Link to="/">Work Journal</Link>
+                  <Link to="/">The Journal</Link>
                 </h1>
                 <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">
-                  Learnings and doings. Updated weekly.
+                  Learnings and doings.
                 </p>
               </div>
             </div>

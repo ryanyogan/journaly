@@ -36,9 +36,10 @@ export function FormField({
             <input
               type="date"
               name="date"
+              style={{ colorScheme: "dark" }}
               className="w-full rounded-sm border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
               required
-              defaultValue={format(new Date(), "yyyy-MM-dd")}
+              defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
             />
           </div>
           <div className="flex space-x-4 text-sm items-center">
@@ -52,7 +53,7 @@ export function FormField({
                   required
                   type="radio"
                   name="type"
-                  value="work"
+                  value={option.value}
                   defaultChecked={option.value === (entry?.type ?? "work")}
                   className="mr-2 border-gray-700 bg-gray-800 text-sky-600  focus:ring-sky-600 focus:ring-offset-gray-900"
                 />
