@@ -79,7 +79,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   <Link to="/">The Journal</Link>
                 </h1>
                 <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">
-                  Learnings and doings.
+                  Learnings and Doings
                 </p>
               </div>
             </div>
