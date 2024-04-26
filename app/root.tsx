@@ -85,10 +85,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </div>
           </header>
 
-          <main className="mx-auto max-w-3xl flex-1">{children}</main>
+          <main className="mx-auto max-w-3xl">{children}</main>
         </div>
 
-        <footer className="absolute bottom-0 text-center w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
+        <footer className="fixed bottom-0 text-center w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
           <p className="text-gray-500 text-sm">
             The Journal is my twitter replacement.
           </p>
