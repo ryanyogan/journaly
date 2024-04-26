@@ -86,23 +86,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className="mx-auto max-w-3xl">{children}</main>
+          <footer className="text-center mt-20 w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
+            <p className="text-gray-500 text-xs">
+              The Journal is my twitter replacement
+            </p>
+            <p className="text-gray-500 text-xs">
+              <a
+                href="https://ryanyogan.com"
+                target="_blank"
+                rel="noreferrer"
+                className="text-sky-500"
+              >
+                www.ryanyogan.com
+              </a>
+            </p>
+          </footer>
         </div>
 
-        <footer className="fixed bottom-0 text-center w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
-          <p className="text-gray-500 text-sm">
-            The Journal is my twitter replacement.
-          </p>
-          <p className="text-gray-500 text-sm">
-            <a
-              href="https://ryanyogan.com"
-              target="_blank"
-              rel="noreferrer"
-              className="text-sky-500"
-            >
-              www.ryanyogan.com
-            </a>
-          </p>
-        </footer>
         <ScrollRestoration />
         <Scripts />
       </body>
