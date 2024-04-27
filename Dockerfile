@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=22.0.0
+ARG NODE_VERSION=21.7.3
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Remix/Prisma"
@@ -58,9 +58,6 @@ VOLUME /data
 
 # add shortcut for connecting to database CLI
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
-
-# Entrypoint prepares the database.
-# ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 ENV PORT="8080"
