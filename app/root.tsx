@@ -46,13 +46,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 target="_blank"
                 className="uppercase"
               >
-                <span className="text-gray-500">Ryan</span>
+                <span className="text-gray-500">Ryan</span>{" "}
                 <span className="font-semibold text-gray-200">Yogan</span>
               </a>
             </div>
             <div className="my-20 lg:my-28">
               <div className="text-center">
-                <h1 className="text-5xl font-semibold tracking-tighter text-white lg:text-7xl">
+                <h1 className="text-5xl font-semibold tracking-tighter text-gray-100 lg:text-7xl">
                   <Link to="/">The Journal</Link>
                 </h1>
                 <p className="mt-2 tracking-tight text-gray-500 lg:mt-4 lg:text-2xl">

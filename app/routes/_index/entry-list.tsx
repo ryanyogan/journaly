@@ -11,7 +11,7 @@ export function EntryList({
 }) {
   return entries.length > 0 ? (
     <div>
-      <p className="font-semibold text-white">{label}</p>
+      <p className="font-semibold text-gray-100">{label}</p>
 
       <ul className="mt-4 space-y-6">
         {entries.map((entry) => (
