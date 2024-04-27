@@ -9,6 +9,7 @@ import { getAuthFromRequest, requireAuthenticatedUser } from "~/auth/session";
 import { db } from "~/db/drizzle.server";
 import { entries } from "~/db/schema";
 import { IndexPage } from "./page";
+import { createEntry } from "./queries";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,6 +23,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   let formData = await request.formData();
   let { date, type, text } = Object.fromEntries(formData);
+
   if (
     typeof date !== "string" ||
     typeof type !== "string" ||
@@ -31,11 +33,9 @@ export async function action({ request }: ActionFunctionArgs) {
     throw new Error("Bad Request");
   }
 
-  return db.insert(entries).values({
-    date: new Date(date).toISOString(),
-    type,
-    text,
-  });
+  await createEntry({ date, type, text });
+
+  return json({ message: "Entry created" }, { status: 201 });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {

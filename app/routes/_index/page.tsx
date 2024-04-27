@@ -1,5 +1,6 @@
 import { useFetcher, useFetchers, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
+import { nanoid } from "nanoid";
 import { useEffect, useRef } from "react";
 import { FormField } from "~/components/form-field";
 import { EntryList } from "./entry-list";
@@ -102,6 +103,6 @@ function usePendingEntries() {
       let text = String(fetcher.formData.get("text"));
       let type = String(fetcher.formData.get("type"));
       let date = String(fetcher.formData.get("date"));
-      return { text, type, date };
+      return { text, type, date, id: nanoid() };
     });
 }
