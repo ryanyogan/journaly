@@ -56,11 +56,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div>
           <header>
             <div className="flex justify-between items-center lg:pt-1 lg:pb-5">
-              <a href="https://ryanyogan.com" rel="noreferrer" target="_blank">
-                <p className="uppercase">
-                  <span className="text-gray-500">Ryan</span>
-                  <span className="font-semibold text-gray-200">Yogan</span>
-                </p>
+              <a
+                href="https://ryanyogan.com"
+                rel="noreferrer"
+                target="_blank"
+                className="uppercase"
+              >
+                <span className="text-gray-500">Ryan</span>
+                <span className="font-semibold text-gray-200">Yogan</span>
               </a>
             </div>
             <div className="my-20 lg:my-28">
@@ -76,7 +79,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </header>
 
           <main className="mx-auto max-w-3xl">{children}</main>
-          <footer className="text-center mt-20 w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
+          <footer className="text-center my-10 w-full max-w-xl p-4 lg:max-w-7xl space-y-1">
             <p className="text-gray-500 text-xs">
               The Journal is my twitter replacement
             </p>

@@ -1,6 +1,7 @@
 import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/react";
 import { eq } from "drizzle-orm";
+import invariant from "tiny-invariant";
 import { getSession } from "~/auth/session";
 import { db } from "~/db/drizzle.server";
 import { entries } from "~/db/schema";
@@ -31,7 +32,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("cookie"));
+  let session = await getSession(request.headers.get("Cookie"));
   if (!session.data.isAdmin) {
     throw new Response("Not authenticated", { status: 401 });
   }
@@ -42,6 +43,7 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   let formData = await request.formData();
   let { date, type, text, intent } = Object.fromEntries(formData);
+  invariant(typeof intent === "string", "intent is required");
 
   switch (intent) {
     case "delete": {

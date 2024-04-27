@@ -18,7 +18,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("cookie"));
+  let session = await getSession(request.headers.get("Cookie"));
   if (!session.data.isAdmin) {
     throw new Response("Not authenticated", { status: 401 });
   }

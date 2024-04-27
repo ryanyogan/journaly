@@ -1,5 +1,5 @@
 import { Link, useLoaderData } from "@remix-run/react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import type { loader } from "./route";
 
 export function EntryListItem({ entry }: { entry: any }) {
@@ -7,9 +7,9 @@ export function EntryListItem({ entry }: { entry: any }) {
 
   return (
     <li className="group leading-7">
-      <div className="text-xs text-gray-500">
-        {format(entry.date, "MMMM dd, yyyy")}
-      </div>
+      <p className="text-xs text-gray-500">
+        {format(parseISO(entry.date), "MMMM dd, yyyy")}
+      </p>
       {entry.text}
 
       {session.isAdmin && (
