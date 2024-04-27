@@ -1,39 +1,39 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs, MetaFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/react";
-import { commitSession, getSession } from "~/auth/session";
+import { redirectIfLoggedInLoader, setAuthOnResponse } from "~/auth/session";
 import { LoginPage } from "./login-page";
+import { login } from "./queries";
+import { validate } from "./validate";
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Journal - Login" },
+    { name: "description", content: "Write it ... or it didn't happen" },
+  ];
+};
+
+export const loader = redirectIfLoggedInLoader;
 
 export async function action({ request }: ActionFunctionArgs) {
   let formData = await request.formData();
-  let { email, password } = Object.fromEntries(formData);
+  let email = String(formData.get("email") || "");
+  let password = String(formData.get("password") || "");
 
-  if (email === "ryan@jk.com" && password === process.env.RYAN_PASSWORD) {
-    let session = await getSession();
-    session.set("isAdmin", true);
-
-    return redirect("/", {
-      headers: {
-        "Set-Cookie": await commitSession(session),
-      },
-    });
-  } else {
-    let error;
-
-    if (!email) {
-      error = "Email is required";
-    } else if (!password) {
-      error = "Password is required";
-    } else {
-      error = "Invalid email or password";
-    }
-
-    return json({ error }, { status: 401 });
+  let errors = validate(email, password);
+  if (errors) {
+    return json({ ok: false, errors }, 400);
   }
-}
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-  return session.data;
+  let userId = await login(email, password);
+  if (!userId) {
+    return json(
+      { ok: false, errors: { email: "Invalid email or password" } },
+      400
+    );
+  }
+
+  let response = redirect("/");
+  return setAuthOnResponse(response, String(userId));
 }
 
 export default LoginPage;

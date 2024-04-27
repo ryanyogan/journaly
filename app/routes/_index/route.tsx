@@ -5,7 +5,7 @@ import type {
 } from "@remix-run/node";
 import { json } from "@remix-run/react";
 import { desc } from "drizzle-orm";
-import { getSession } from "~/auth/session";
+import { getAuthFromRequest, requireAuthenticatedUser } from "~/auth/session";
 import { db } from "~/db/drizzle.server";
 import { entries } from "~/db/schema";
 import { IndexPage } from "./page";
@@ -18,10 +18,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", { status: 401 });
-  }
+  await requireAuthenticatedUser(request);
 
   let formData = await request.formData();
   let { date, type, text } = Object.fromEntries(formData);
@@ -42,12 +39,11 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-
+  let userId = await getAuthFromRequest(request);
   let posts = await db.select().from(entries).orderBy(desc(entries.date));
 
   return json({
-    session: session.data,
+    userId,
     entries: posts.map((entry) => ({
       ...entry,
       date: entry.date.substring(0, 10),

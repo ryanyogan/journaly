@@ -8,7 +8,7 @@ import type { loader } from "./route";
 export function IndexPage() {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
-  let { entries: serverEntries, session } = useLoaderData<typeof loader>();
+  let { entries: serverEntries, userId } = useLoaderData<typeof loader>();
 
   let pendingEntries = usePendingEntries();
   type Entry = (typeof serverEntries)[number] | (typeof pendingEntries)[number];
@@ -49,7 +49,7 @@ export function IndexPage() {
 
   return (
     <div>
-      {session.isAdmin && (
+      {userId && (
         <div className="my-8 border rounded-lg border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
           <p className="text-sm font-medium text-gray-500 lg:text-base">
             New entry
@@ -70,9 +70,14 @@ export function IndexPage() {
             </p>
 
             <div className="mt-6 space-y-8 lg:space-y-12">
-              <EntryList entries={week.work} label="Work" />
-              <EntryList entries={week.learnings} label="Learnings" />
+              <EntryList userId={userId} entries={week.work} label="Work" />
               <EntryList
+                userId={userId}
+                entries={week.learnings}
+                label="Learnings"
+              />
+              <EntryList
+                userId={userId}
                 entries={week.interestingThings}
                 label="Interesting things"
               />

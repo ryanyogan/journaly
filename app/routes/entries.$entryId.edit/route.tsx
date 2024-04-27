@@ -1,13 +1,26 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
+import type {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+} from "@remix-run/node";
 import { json, redirect } from "@remix-run/react";
 import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
-import { getSession } from "~/auth/session";
+import { requireAuthenticatedUser } from "~/auth/session";
 import { db } from "~/db/drizzle.server";
 import { entries } from "~/db/schema";
 import { EditPage } from "./edit-page";
 
+export const meta: MetaFunction = () => {
+  return [
+    { title: "Journal - Edit Entry" },
+    { name: "description", content: "Write it ... or it didn't happen" },
+  ];
+};
+
 export async function loader({ params, request }: LoaderFunctionArgs) {
+  await requireAuthenticatedUser(request);
+
   if (typeof params.entryId !== "string") {
     throw new Response("Not Found", { status: 404 });
   }
@@ -20,11 +33,6 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  let session = await getSession(request.headers.get("Cookie"));
-  if (!session?.data?.isAdmin) {
-    throw new Response("Unauthorized", { status: 401 });
-  }
-
   return json({
     ...entry,
     date: entry.date.substring(0, 10),
@@ -32,10 +40,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, params }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-  if (!session.data.isAdmin) {
-    throw new Response("Not authenticated", { status: 401 });
-  }
+  await requireAuthenticatedUser(request);
 
   if (typeof params.entryId !== "string") {
     throw new Response("Not Found", { status: 404 });

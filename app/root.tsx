@@ -8,33 +8,17 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   json,
-  redirect,
   useLoaderData,
   useRouteError,
 } from "@remix-run/react";
 
-import type {
-  ActionFunctionArgs,
-  LinksFunction,
-  LoaderFunctionArgs,
-} from "@remix-run/node";
-import { destroySession, getSession } from "./auth/session";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { getAuthFromRequest } from "./auth/session";
 import "./styles.css";
 
-export async function action({ request }: ActionFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-
-  return redirect("/", {
-    headers: {
-      "Set-Cookie": await destroySession(session),
-    },
-  });
-}
-
 export async function loader({ request }: LoaderFunctionArgs) {
-  let session = await getSession(request.headers.get("Cookie"));
-
-  return json({ session: session.data });
+  let auth = await getAuthFromRequest(request);
+  return json({ auth });
 }
 
 export const links: LinksFunction = () => [
@@ -42,7 +26,7 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  let { session } = useLoaderData<typeof loader>();
+  let { auth } = useLoaderData<typeof loader>();
 
   return (
     <html lang="en">
@@ -94,8 +78,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </a>
             </p>
             <div className="text-gray-500 text-xs font-medium hover:text-gray-200">
-              {session?.isAdmin ? (
-                <Form method="post">
+              {auth ? (
+                <Form method="post" action="/logout">
                   <button>Logout</button>
                 </Form>
               ) : (

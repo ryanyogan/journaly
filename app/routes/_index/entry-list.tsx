@@ -3,9 +3,11 @@ import { EntryListItem } from "./entry-list-item";
 export function EntryList({
   entries,
   label,
+  userId,
 }: {
   entries: any[];
   label: string;
+  userId?: string | null;
 }) {
   return entries.length > 0 ? (
     <div>
@@ -13,7 +15,7 @@ export function EntryList({
 
       <ul className="mt-4 space-y-6">
         {entries.map((entry) => (
-          <EntryListItem key={entry.id} entry={entry} />
+          <EntryListItem userId={userId} key={entry.id} entry={entry} />
         ))}
       </ul>
     </div>
