@@ -1,18 +1,22 @@
-import { db } from "~/db/drizzle.server";
-import { entries } from "~/db/schema";
+import { prisma } from "~/db/prisma";
 
 export async function createEntry({
   date,
   type,
   text,
+  id,
 }: {
   date: string;
   type: string;
   text: string;
+  id?: string;
 }) {
-  return db.insert(entries).values({
-    date: new Date(date).toISOString(),
-    type,
-    text,
+  return prisma.entry.create({
+    data: {
+      id,
+      date: new Date(date),
+      type,
+      text,
+    },
   });
 }

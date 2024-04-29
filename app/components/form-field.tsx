@@ -1,6 +1,7 @@
-import { useFetcher } from "@remix-run/react";
+import { Form, useFetcher, useSubmit } from "@remix-run/react";
 import { format } from "date-fns";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
+import { validate } from "~/routes/_index/validate";
 
 export function FormField({
   entry,
@@ -13,27 +14,36 @@ export function FormField({
 }) {
   let fetcher = useFetcher();
   let textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (
-      fetcher.state === "idle" &&
-      fetcher.data === null &&
-      textareaRef.current
-    ) {
-      textareaRef.current.value = "";
-      textareaRef.current.focus();
-    }
-  }, [fetcher.state, fetcher.data]);
+  let submit = useSubmit();
 
   return (
-    <fetcher.Form method="post" className="mt-4">
+    <Form
+      method="post"
+      className="mt-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+
+        let formData = new FormData(e.currentTarget);
+        let data = validate(Object.fromEntries(formData));
+
+        submit(
+          { ...data, id: crypto.randomUUID() },
+          {
+            navigate: false,
+            method: "post",
+          }
+        );
+
+        if (textareaRef.current) {
+          textareaRef.current.value = "";
+          textareaRef.current.focus();
+        }
+      }}
+    >
       <input type="hidden" name="intent" value="createEntry" />
-      <fieldset
-        className="disabled:opacity-70"
-        disabled={fetcher.state === "submitting"}
-      >
-        <div className="space-y-6">
-          <div>
+      <fieldset>
+        <div className="lg:flex lg:items-center lg:justify-between">
+          <div className="lg:order-2">
             <input
               type="date"
               name="date"
@@ -43,7 +53,8 @@ export function FormField({
               defaultValue={entry?.date ?? format(new Date(), "yyyy-MM-dd")}
             />
           </div>
-          <div className="flex space-x-4 text-sm items-center">
+
+          <div className="mt-6 flex space-x-4 text-sm lg:mt-0 lg:space-x-6 lg:text-base">
             {[
               { label: "Work", value: "work" },
               { label: "Learning", value: "learning" },
@@ -64,7 +75,7 @@ export function FormField({
           </div>
         </div>
 
-        <div className="mt-4">
+        <div className="mt-6">
           <textarea
             ref={textareaRef}
             placeholder="Type your entry..."
@@ -72,9 +83,17 @@ export function FormField({
             className="w-full rounded-md border-gray-700 bg-gray-800 text-white focus:border-sky-600 focus:ring-sky-600"
             required
             defaultValue={entry?.text}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                e.currentTarget.form?.dispatchEvent(
+                  new Event("submit", { bubbles: true, cancelable: true })
+                );
+              }
+            }}
           />
         </div>
-        <div className="mt-2 text-right">
+        <div className="mt-6 text-right">
           <button
             type="submit"
             className="w-full rounded-md bg-sky-600 px-4 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-sky-600 focus:ring-offset-2 focus:ring-offset-gray-900"
@@ -83,6 +102,6 @@ export function FormField({
           </button>
         </div>
       </fieldset>
-    </fetcher.Form>
+    </Form>
   );
 }

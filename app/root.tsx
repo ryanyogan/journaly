@@ -44,7 +44,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 href="https://ryanyogan.com"
                 rel="noreferrer"
                 target="_blank"
-                className="uppercase"
+                className="uppercase text-sm lg:text-lg"
               >
                 <span className="text-gray-500">Ryan</span>{" "}
                 <span className="font-semibold text-gray-200">Yogan</span>

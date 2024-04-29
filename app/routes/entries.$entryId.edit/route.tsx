@@ -4,11 +4,9 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { json, redirect } from "@remix-run/react";
-import { eq } from "drizzle-orm";
 import invariant from "tiny-invariant";
 import { requireAuthenticatedUser } from "~/auth/session";
-import { db } from "~/db/drizzle.server";
-import { entries } from "~/db/schema";
+import { prisma } from "~/db/prisma";
 import { EditPage } from "./edit-page";
 
 export const meta: MetaFunction = () => {
@@ -25,8 +23,8 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
     throw new Response("Not Found", { status: 404 });
   }
 
-  let entry = await db.query.entries.findFirst({
-    where: eq(entries.id, Number(params.entryId)),
+  let entry = await prisma.entry.findFirst({
+    where: { id: params.entryId },
   });
 
   if (!entry) {
@@ -35,7 +33,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
 
   return json({
     ...entry,
-    date: entry.date.substring(0, 10),
+    date: entry.date.toISOString().substring(0, 10),
   });
 }
 
@@ -52,7 +50,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 
   switch (intent) {
     case "delete": {
-      await db.delete(entries).where(eq(entries.id, Number(params.entryId)));
+      await prisma.entry.delete({
+        where: { id: params.entryId },
+      });
 
       return redirect("/");
     }
@@ -66,14 +66,14 @@ export async function action({ request, params }: ActionFunctionArgs) {
         throw new Error("Bad Request");
       }
 
-      await db
-        .update(entries)
-        .set({
-          date: new Date(date).toISOString(),
+      await prisma.entry.update({
+        where: { id: params.entryId },
+        data: {
+          date: new Date(date),
           type,
           text,
-        })
-        .where(eq(entries.id, Number(params.entryId)));
+        },
+      });
 
       return redirect("/");
     }

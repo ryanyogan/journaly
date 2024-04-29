@@ -1,19 +1,29 @@
-import { useFetcher, useFetchers, useLoaderData } from "@remix-run/react";
+import { CloudIcon } from "@heroicons/react/20/solid";
+import { useFetchers, useLoaderData } from "@remix-run/react";
 import { format, parseISO, startOfWeek } from "date-fns";
-import { nanoid } from "nanoid";
-import { useEffect, useRef } from "react";
 import { FormField } from "~/components/form-field";
 import { EntryList } from "./entry-list";
 import type { loader } from "./route";
+import { validate } from "./validate";
+
+type Entry = Awaited<ReturnType<typeof loader>>["entries"][number];
 
 export function IndexPage() {
-  let fetcher = useFetcher();
-  let textareaRef = useRef<HTMLTextAreaElement>(null);
-  let { entries: serverEntries, userId } = useLoaderData<typeof loader>();
+  let fetchers = useFetchers();
+  let { entries, userId } = useLoaderData<typeof loader>();
 
-  let pendingEntries = usePendingEntries();
-  type Entry = (typeof serverEntries)[number] | (typeof pendingEntries)[number];
-  let entries = [...serverEntries, ...pendingEntries] as Entry[];
+  let optomisticEntries = fetchers.reduce<Entry[]>((memo, f) => {
+    if (f.formData) {
+      let data = validate(Object.fromEntries(f.formData));
+      if (!entries.map((e) => e.id).includes(data.id)) {
+        memo.push(data);
+      }
+    }
+
+    return memo;
+  }, []);
+
+  entries = [...entries, ...optomisticEntries];
 
   let entriesByWeek = entries.reduce<Record<string, typeof entries>>(
     (sortedEntries, entry) => {
@@ -41,20 +51,18 @@ export function IndexPage() {
       ),
     }));
 
-  useEffect(() => {
-    if (fetcher.state === "idle" && textareaRef.current) {
-      textareaRef.current.value = "";
-      textareaRef.current.focus();
-    }
-  }, [fetcher.state]);
-
   return (
     <div>
       {userId && (
         <div className="my-8 border rounded-lg border-gray-700/30 bg-gray-800/50 p-4 lg:mb-20 lg:p-6">
-          <p className="text-sm font-medium text-gray-500 lg:text-base">
-            New entry
-          </p>
+          <div className="flex text-center justify-between">
+            <p className="text-sm font-medium text-gray-500 lg:text-base">
+              New entry
+            </p>
+            {optomisticEntries.length > 0 && (
+              <CloudIcon className="w-4 h-4 text-gray-500" />
+            )}
+          </div>
           <FormField />
         </div>
       )}
@@ -90,19 +98,15 @@ export function IndexPage() {
   );
 }
 
-function usePendingEntries() {
-  type CreateEntryFetcher = ReturnType<typeof useFetchers>[number] & {
-    formData: FormData;
-  };
-
-  return useFetchers()
-    .filter((fetcher): fetcher is CreateEntryFetcher => {
-      return fetcher.formData?.get("intent") === "createEntry";
-    })
-    .map((fetcher) => {
-      let text = String(fetcher.formData.get("text"));
-      let type = String(fetcher.formData.get("type"));
-      let date = String(fetcher.formData.get("date"));
-      return { text, type, date, id: nanoid() };
-    });
-}
+// return useFetchers()
+//   .filter((fetcher): fetcher is CreateEntryFetcher => {
+//     return fetcher.formData?.get("intent") === "createEntry";
+//   })
+//   .map((fetcher) => {
+//     let text = String(fetcher.formData.get("text"));
+//     let type = String(fetcher.formData.get("type"));
+//     let date = String(fetcher.formData.get("date"));
+//     let id = String(fetcher.formData.get("id"));
+//     return { text, type, date, id };
+//   });
+// }
