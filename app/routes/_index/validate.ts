@@ -13,5 +13,5 @@ export function validate(data: Record<string, any>) {
     throw new Error("Bad Request");
   }
 
-  return { date, type, text, id };
+  return { date, type, text, id: String(id) };
 }

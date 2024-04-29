@@ -16,7 +16,11 @@ export function IndexPage() {
     if (f.formData) {
       let data = validate(Object.fromEntries(f.formData));
       if (!entries.map((e) => e.id).includes(data.id)) {
-        memo.push(data);
+        memo.push({
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
       }
     }
 
@@ -97,16 +101,3 @@ export function IndexPage() {
     </div>
   );
 }
-
-// return useFetchers()
-//   .filter((fetcher): fetcher is CreateEntryFetcher => {
-//     return fetcher.formData?.get("intent") === "createEntry";
-//   })
-//   .map((fetcher) => {
-//     let text = String(fetcher.formData.get("text"));
-//     let type = String(fetcher.formData.get("type"));
-//     let date = String(fetcher.formData.get("date"));
-//     let id = String(fetcher.formData.get("id"));
-//     return { text, type, date, id };
-//   });
-// }

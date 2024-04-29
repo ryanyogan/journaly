@@ -4,8 +4,10 @@ import type {
   MetaFunction,
 } from "@remix-run/node";
 import { json } from "@remix-run/react";
+import { desc } from "drizzle-orm";
 import { getAuthFromRequest, requireAuthenticatedUser } from "~/auth/session";
-import { prisma } from "~/db/prisma";
+import { db } from "~/db/drizzle.server";
+import { entries } from "~/db/schema";
 import { IndexPage } from "./page";
 import { createEntry } from "./queries";
 
@@ -40,17 +42,13 @@ export async function action({ request }: ActionFunctionArgs) {
 export async function loader({ request }: LoaderFunctionArgs) {
   let userId = await getAuthFromRequest(request);
 
-  let posts = await prisma.entry.findMany({
-    orderBy: {
-      date: "desc",
-    },
-  });
+  let posts = await db.select().from(entries).orderBy(desc(entries.date));
 
   return {
     userId,
     entries: posts.map((entry) => ({
       ...entry,
-      date: entry.date.toISOString().substring(0, 10),
+      date: entry.date.substring(0, 10),
     })),
   };
 }

@@ -27,7 +27,7 @@ export function FormField({
         let data = validate(Object.fromEntries(formData));
 
         submit(
-          { ...data, id: crypto.randomUUID() },
+          { ...data, id: crypto.randomUUID(), intent: "createEntry" },
           {
             navigate: false,
             method: "post",
