@@ -7,6 +7,7 @@ app = 'journaly'
 primary_region = 'ord'
 kill_signal = "SIGINT"
 kill_timeout = 5
+swap_size_mb = 256
 processes = ['app']
 
 [mounts]
