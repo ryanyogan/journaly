@@ -25,12 +25,12 @@ RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp openssl pkg-config python-is-python3
 
 # Install node modules
-COPY --link package-lock.json package.json pnpm-lock.yaml ./
+COPY --link package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile --prod=false
 
 # Generate Prisma Client
-# COPY --link prisma .
-# RUN npx prisma generate
+COPY --link prisma .
+RUN npx prisma generate
 
 # Copy application code
 COPY --link . .
@@ -51,6 +51,7 @@ RUN apt-get update -qq && \
 
 # Copy built application
 COPY --from=build /app /app
+COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data
@@ -60,9 +61,10 @@ VOLUME /data
 RUN echo "#!/bin/sh\nset -x\nsqlite3 \$DATABASE_URL" > /usr/local/bin/database-cli && chmod +x /usr/local/bin/database-cli
 
 # Entrypoint prepares the database.
-# ENTRYPOINT [ "/app/docker-entrypoint.js" ]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
-ENV DATABASE_URL="/data/sqlite.db"
-CMD [ "pnpm", "run", "start" ]
+ENV DATABASE_URL="file:/data/sqlite.db"
+
+# CMD [ "pnpm", "run", "start" ]
+ENTRYPOINT [ "./start.sh" ]

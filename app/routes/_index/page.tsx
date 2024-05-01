@@ -16,11 +16,7 @@ export function IndexPage() {
     if (f.formData) {
       let data = validate(Object.fromEntries(f.formData));
       if (!entries.map((e) => e.id).includes(data.id)) {
-        memo.push({
-          ...data,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        });
+        memo.push(data);
       }
     }
 
