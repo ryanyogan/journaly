@@ -51,7 +51,6 @@ RUN apt-get update -qq && \
 
 # Copy built application
 COPY --from=build /app /app
-COPY --from=build /app/node_modules/.prisma /app/node_modules/.prisma
 
 # Setup sqlite3 on a separate volume
 RUN mkdir -p /data
