@@ -8,7 +8,7 @@ export function EntryListItem({
   userId?: string | null;
 }) {
   return (
-    <li className="group leading-7 text-gray-300">
+    <li className="group leading-7">
       {entry.text}
 
       {userId && (
